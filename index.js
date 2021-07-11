@@ -17,6 +17,10 @@ app.get('/', (req, res)=>{
   res.send('hello')
 })
 
+app.get('/images/:id', (req, res) => {
+    res.sendFile('./images/' + req.params.id)
+})
+
 app.use('/api',[ApiUser,ApiFarm,ApiProducts,ApiImages,ApiChatRooms,ApiMessage])
 
 app.listen(port)
