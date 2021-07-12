@@ -1,7 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db') 
- 
+const fs = require('fs')
+const bodyParser = require('body-parser')
+
 router.route('/images?')
     .get((req, res, next) => { 
         let sql = ' SELECT * FROM pphoto '
@@ -17,7 +19,9 @@ router.route('/images?')
             return res.json(result)        
         })
     })
-    .post((req, res, next) => {   
+    .post((req, res, next) => {
+        
+  
         let image = {
              "ptname": req.body.ptname,
              "pid": req.body.pid
@@ -29,12 +33,19 @@ router.route('/images?')
                 "status": 500,
                 "message": "Internal Server Error" 
             })
+
             image = [{'ptid':results.insertId, ...image}]
             const result = {
                 "status": 200,
                 "data": image
             }
-            return res.json(result)        
+
+            let p = './images/' + req.body.imagename
+
+            fs.writeFile(p, req.body.imgsource, 'base64', (err) => {
+               if (err) throw err
+            })
+            return res.json(result)
         })
     })
  
@@ -98,5 +109,20 @@ router.route('/image/:id')
             return res.json(result)        
         })
     })
- 
+
+router.get('/images/product/:id',(req, res, next) => {
+        let sql = ' SELECT * FROM pphoto WHERE pid = ? '
+        db.query(sql,[req.params.id],(error, results, fields)=>{
+            if(error) return res.status(500).json({
+                "status": 500,
+                "message": "Internal Server Error"
+            })
+            const result = {
+                "status": 200,
+                "data": results
+            }
+            return res.json(result)
+        })
+})
+
 module.exports = router
